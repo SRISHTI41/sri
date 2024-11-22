@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
       - name: cloud
-        image: gcr.io/YOUR_PROJECT_ID/cloud:latest
+        image: gcr.io/cloud-442509/cloud:latest
         ports:
         - containerPort: 8080

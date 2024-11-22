@@ -8,7 +8,7 @@ steps:
   args:
     - 'build'
     - '-t'
-    - 'gcr.io/$PROJECT_ID/cloud:$SHORT_SHA'
+    - 'gcr.io/442509/cloud:$SHORT_SHA'
     - '.'
 
 # Step 3: Deploy to Google Kubernetes Engine (GKE)
@@ -17,16 +17,16 @@ steps:
     - 'container'
     - 'clusters'
     - 'get-credentials'
-    - 'YOUR_CLUSTER_NAME'
+    - 'cloud-cluster'
     - '--zone'
-    - 'YOUR_CLUSTER_ZONE'
+    - 'us-central1-a'
 
 - name: 'gcr.io/cloud-builders/kubectl'
   args:
     - 'set'
     - 'image'
     - 'deployment/cloud-app'
-    - 'cloud-app=gcr.io/$PROJECT_ID/cloud:$SHORT_SHA'
+    - 'cloud-app=gcr.io/442509/cloud:$SHORT_SHA'
     - '--record'
 
 - name: 'gcr.io/cloud-builders/kubectl'
