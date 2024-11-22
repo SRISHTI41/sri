@@ -11,19 +11,20 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/your-image:latest', '.']
 
-  # Step 4: Configure kubectl and deploy
-  - name: 'gcr.io/cloud-builders/kubectl'
-    env:
-      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'  # Set your GKE cluster's zone
-      - 'CLOUDSDK_CONTAINER_CLUSTER=cloud-cluster'  # Set your GKE cluster's name
-      - 'CLOUDSDK_COMPUTE_REGION=us-central1'  # Set your GKE cluster's region
+  steps:
+  - name: 'gcr.io/cloud-builders/gcloud'
     args:
+      - 'container'
+      - 'clusters'
       - 'get-credentials'
-      - 'cloud-cluster'
+      - 'cloud-cluster'  # Your cluster name here
       - '--zone'
-      - 'us-central1-a'
+      - 'us-central1-a'  # Your cluster zone here
       - '--project'
-      - '$PROJECT_ID'
+      - 'cloud-442509'  # Your project ID
+
+
+ 
 
   # Step 5: Deploy to Kubernetes (use kubectl)
   - name: 'gcr.io/cloud-builders/kubectl'
