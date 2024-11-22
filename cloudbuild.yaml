@@ -1,59 +1,59 @@
+# cloudbuild.yaml
 steps:
-# Step 1: Build the application using Maven
-- name: 'gcr.io/cloud-builders/mvn'
-  args: ['clean', 'package', '-DskipTests']
+  # Step 1: Use Maven to build the application
+  - name: 'gcr.io/cloud-builders/maven'
+    args: ['clean', 'package', '-DskipTests']
 
-# Step 2: Build Docker image and push to Google Container Registry (GCR)
-- name: 'gcr.io/cloud-builders/docker'
-  args:
-    - 'build'
-    - '-t'
-    - 'gcr.io/442509/cloud:$SHORT_SHA'
-    - '.'
-- name: 'gcr.io/cloud-builders/kubectl'
-    env:
-      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'  # Set your GKE cluster's zone
-      - 'CLOUDSDK_CONTAINER_CLUSTER=cloud-cluster'  # Set your GKE cluster's name
-      - 'CLOUDSDK_COMPUTE_REGION=us-central1'
+  # Step 2: Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '--tag=gcr.io/cloud-442509/cloud-app:$SHORT_SHA'
+      - '.'
 
-# Step 3: Deploy to Google Kubernetes Engine (GKE)
-- name: 'gcr.io/cloud-builders/gcloud'
-  args:
-    - 'container'
-    - 'clusters'
-    - 'get-credentials'
-    - 'cloud-cluster'
-    - '--zone'
-    - 'us-central1-a'
+  # Step 3: Push the Docker image to Google Container Registry (GCR)
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/cloud-442509/cloud-app:$SHORT_SHA'
 
-- name: 'gcr.io/cloud-builders/kubectl'
-  args:
-    - 'set'
-    - 'image'
-    - 'deployment/cloud-app'
-    - 'cloud-app=gcr.io/442509/cloud:$SHORT_SHA'
-    - '--record'
+  # Step 4: Authenticate with Google Cloud SDK using the service account
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'auth'
+      - 'activate-service-account'
+      - '--key-file=$GOOGLE_APPLICATION_CREDENTIALS'
 
-- name: 'gcr.io/cloud-builders/kubectl'
-  args:
-    - 'apply'
-    - '-f'
-    - 'kubernetes/deployment.yaml'
+  # Step 5: Set up Kubernetes configuration to deploy to GKE
+  - name: 'gcr.io/cloud-builders/gcloud'
+    args:
+      - 'container'
+      - 'clusters'
+      - 'get-credentials'
+      - 'cloud-cluster'
+      - '--zone'
+      - 'us-central1-a'
+      - '--project'
+      - 'cloud-442509'
 
-- name: 'gcr.io/cloud-builders/kubectl'
-  args:
-    - 'apply'
-    - '-f'
-    - 'kubernetes/service.yaml'
+  # Step 6: Deploy the Docker image to GKE
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      - 'set'
+      - 'image'
+      - 'deployment/cloud-app'
+      - 'cloud-app=gcr.io/cloud-442509/cloud-app:$SHORT_SHA'
+      - '--record'
 
-# Step 4: Output the External IP of the Service
-- name: 'gcr.io/cloud-builders/kubectl'
-  args:
-    - 'get'
-    - 'service'
-    - 'cloud-service'
-    - '--output'
-    - 'jsonpath={.status.loadBalancer.ingress[0].ip}'
+  # Step 7: Expose the application (optional, assuming you have a service.yaml)
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      - 'apply'
+      - '-f'
+      - 'kubernetes/service.yaml'
 
-options:
-  logging: CLOUD_LOGGING_ONLY
+# Set environment variables
+availableSecrets:
+  secretManager:
+    - versionName: projects/cloud-442509/secrets/GOOGLE_APPLICATION_CREDENTIALS/versions/latest
+      env: GOOGLE_APPLICATION_CREDENTIALS
