@@ -45,15 +45,13 @@ steps:
       - 'cloud-app=gcr.io/cloud-442509/cloud-app:$SHORT_SHA'
       - '--record'
 
-  # Step 7: Expose the application (optional, assuming you have a service.yaml)
+  # Step 7: Expose the application (optional)
   - name: 'gcr.io/cloud-builders/kubectl'
     args:
       - 'apply'
       - '-f'
-      - 'kubernetes/service.yaml'
+      - 'service.yaml'
 
-# Set environment variables
-availableSecrets:
-  secretManager:
-    - versionName: projects/cloud-442509/secrets/GOOGLE_APPLICATION_CREDENTIALS/versions/latest
-      env: GOOGLE_APPLICATION_CREDENTIALS
+# Specify where to store build logs
+options:
+  logging: CLOUD_LOGGING_ONLY
