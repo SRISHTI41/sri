@@ -17,12 +17,7 @@ steps:
       - 'push'
       - 'gcr.io/cloud-442509/cloud-app:$SHORT_SHA'
 
-  # Step 4: Authenticate with Google Cloud SDK using the service account
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args:
-      - 'auth'
-      - 'activate-service-account'
-      - '--key-file=$GOOGLE_APPLICATION_CREDENTIALS'
+  
 
   # Step 5: Set up Kubernetes configuration to deploy to GKE
   - name: 'gcr.io/cloud-builders/gcloud'
