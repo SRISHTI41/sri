@@ -11,7 +11,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['build', '-t', 'gcr.io/$PROJECT_ID/your-image:latest', '.']
 
-  steps:
+  
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
       - 'container'
