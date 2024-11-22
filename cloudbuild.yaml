@@ -10,6 +10,11 @@ steps:
     - '-t'
     - 'gcr.io/442509/cloud:$SHORT_SHA'
     - '.'
+- name: 'gcr.io/cloud-builders/kubectl'
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'  # Set your GKE cluster's zone
+      - 'CLOUDSDK_CONTAINER_CLUSTER=cloud-cluster'  # Set your GKE cluster's name
+      - 'CLOUDSDK_COMPUTE_REGION=us-central1'
 
 # Step 3: Deploy to Google Kubernetes Engine (GKE)
 - name: 'gcr.io/cloud-builders/gcloud'
