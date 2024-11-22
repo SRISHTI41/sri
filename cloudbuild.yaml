@@ -1,37 +1,53 @@
-steps:
-  # Step 1: Checkout the code
-  - name: 'gcr.io/cloud-builders/git'
-    args: ['clone', 'https://github.com/your-repo.git']
+substitutions:
+  _GCP_PROJECT_ID: 'cloud-442509'
+  _CLUSTER_NAME: 'cloud-cluster'  # Replace with your cluster name
+  _ZONE: 'us-central1-a'          # Replace with your cluster zone
 
-  # Step 2: Build the jar using Maven
+steps:
+  # Build the Docker image
   - name: 'gcr.io/cloud-builders/maven'
     args: ['clean', 'package', '-DskipTests']
 
-  # Step 3: Docker build
+  # Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'gcr.io/$PROJECT_ID/your-image:latest', '.']
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/${_GCP_PROJECT_ID}/cloud:${SHORT_SHA}'
+      - '.'
 
-  
+  # Push the image to Google Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/${_GCP_PROJECT_ID}/cloud:${SHORT_SHA}'
+
+  # Get credentials for the cluster
   - name: 'gcr.io/cloud-builders/gcloud'
     args:
       - 'container'
       - 'clusters'
       - 'get-credentials'
-      - 'cloud-cluster'  # Your cluster name here
+      - '${_CLUSTER_NAME}'
       - '--zone'
-      - 'us-central1-a'  # Your cluster zone here
+      - '${_ZONE}'
       - '--project'
-      - 'cloud-442509'  # Your project ID
+      - '${_GCP_PROJECT_ID}'
 
-
- 
-
-  # Step 5: Deploy to Kubernetes (use kubectl)
+  # Deploy to the Kubernetes cluster
   - name: 'gcr.io/cloud-builders/kubectl'
+    env:
+      - 'CLOUDSDK_COMPUTE_REGION=us-central1'  # Optional if using regional clusters
+      - 'CLOUDSDK_COMPUTE_ZONE=${_ZONE}'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
     args:
       - 'apply'
       - '-f'
-      - 'k8s/deployment.yaml'
+      - 'k8s-deployment.yaml'  # Path to your Kubernetes deployment manifest
+
+images:
+  - 'gcr.io/${_GCP_PROJECT_ID}/cloud:${SHORT_SHA}'
+
 
 
 options:
