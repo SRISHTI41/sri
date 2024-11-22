@@ -49,3 +49,6 @@ steps:
     - 'cloud-service'
     - '--output'
     - 'jsonpath={.status.loadBalancer.ingress[0].ip}'
+
+options:
+  logging: CLOUD_LOGGING_ONLY
