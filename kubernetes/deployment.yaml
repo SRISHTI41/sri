@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
       - name: cloud
-        image: gcr.io/cloud-442509/cloud:latest
+        image: gcr.io/cloud-442509/cloud-app:$SHORT_SHA
         ports:
         - containerPort: 8080
