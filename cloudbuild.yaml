@@ -1,54 +1,59 @@
-substitutions:
-  _GCP_PROJECT_ID: 'cloud-442509'
-  _CLUSTER_NAME: 'cloud-cluster'  # Replace with your cluster name
-  _ZONE: 'us-central1-a'          # Replace with your cluster zone
-
 steps:
-  # Build the Docker image
-  - name: 'gcr.io/cloud-builders/maven'
-    args: ['clean', 'package', '-DskipTests']
+# Step 1: Build the application using Maven
+- name: 'gcr.io/cloud-builders/mvn'
+  args: ['clean', 'package', '-DskipTests']
 
-  # Build the Docker image
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'build'
-      - '-t'
-      - 'gcr.io/${_GCP_PROJECT_ID}/cloud:${SHORT_SHA}'
-      - '.'
-
-  # Push the image to Google Container Registry
-  - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - 'gcr.io/${_GCP_PROJECT_ID}/cloud:${SHORT_SHA}'
-
-  # Get credentials for the cluster
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args:
-      - 'container'
-      - 'clusters'
-      - 'get-credentials'
-      - '${_CLUSTER_NAME}'
-      - '--zone'
-      - '${_ZONE}'
-      - '--project'
-      - '${_GCP_PROJECT_ID}'
-
-  # Deploy to the Kubernetes cluster
-  - name: 'gcr.io/cloud-builders/kubectl'
+# Step 2: Build Docker image and push to Google Container Registry (GCR)
+- name: 'gcr.io/cloud-builders/docker'
+  args:
+    - 'build'
+    - '-t'
+    - 'gcr.io/442509/cloud:$SHORT_SHA'
+    - '.'
+- name: 'gcr.io/cloud-builders/kubectl'
     env:
-      - 'CLOUDSDK_COMPUTE_REGION=us-central1'  # Optional if using regional clusters
-      - 'CLOUDSDK_COMPUTE_ZONE=${_ZONE}'
-      - 'CLOUDSDK_CONTAINER_CLUSTER=${_CLUSTER_NAME}'
-    args:
-      - 'apply'
-      - '-f'
-      - 'k8s-deployment.yaml'  # Path to your Kubernetes deployment manifest
+      - 'CLOUDSDK_COMPUTE_ZONE=us-central1-a'  # Set your GKE cluster's zone
+      - 'CLOUDSDK_CONTAINER_CLUSTER=cloud-cluster'  # Set your GKE cluster's name
+      - 'CLOUDSDK_COMPUTE_REGION=us-central1'
 
-images:
-  - 'gcr.io/${_GCP_PROJECT_ID}/cloud:${SHORT_SHA}'
+# Step 3: Deploy to Google Kubernetes Engine (GKE)
+- name: 'gcr.io/cloud-builders/gcloud'
+  args:
+    - 'container'
+    - 'clusters'
+    - 'get-credentials'
+    - 'cloud-cluster'
+    - '--zone'
+    - 'us-central1-a'
 
+- name: 'gcr.io/cloud-builders/kubectl'
+  args:
+    - 'set'
+    - 'image'
+    - 'deployment/cloud-app'
+    - 'cloud-app=gcr.io/442509/cloud:$SHORT_SHA'
+    - '--record'
 
+- name: 'gcr.io/cloud-builders/kubectl'
+  args:
+    - 'apply'
+    - '-f'
+    - 'kubernetes/deployment.yaml'
+
+- name: 'gcr.io/cloud-builders/kubectl'
+  args:
+    - 'apply'
+    - '-f'
+    - 'kubernetes/service.yaml'
+
+# Step 4: Output the External IP of the Service
+- name: 'gcr.io/cloud-builders/kubectl'
+  args:
+    - 'get'
+    - 'service'
+    - 'cloud-service'
+    - '--output'
+    - 'jsonpath={.status.loadBalancer.ingress[0].ip}'
 
 options:
   logging: CLOUD_LOGGING_ONLY
