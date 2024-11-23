@@ -35,11 +35,5 @@ steps:
 
 
 
-# Optional: List the images to be used in Kubernetes deployment
-images:
-  - 'gcr.io/$PROJECT_ID/spring-boot-app:latest'
-
-images:
-  - 'us-central1-docker.pkg.dev/cloud-442509/spring-boot-repo/spring-boot-app:$SHORT_SHA'
 options:
   logging: CLOUD_LOGGING_ONLY

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: spring-boot-container
-          image: us-central1-docker.pkg.dev/cloud-442509/spring-boot-repo/spring-boot-app:latest
+          image: us-central1-docker.pkg.dev/cloud-442509/my-repository/spring-boot-app:latest
           ports:
             - containerPort: 8080
 
