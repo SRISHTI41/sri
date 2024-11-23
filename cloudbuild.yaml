@@ -1,22 +1,22 @@
 steps:
   # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['build', '-t', 'us-central1-docker.pkg.dev/cloud-442509/spring-boot-repo/spring-boot-app:$SHORT_SHA', '.']
+    args: ['build', '-t', 'gcr.io/cloud-442509/spring-boot-app:latest', '.']
 
-  # Step 2: Push the Docker image to Artifact Registry
+  # Step 2: Push the image to Google Container Registry (GCR)
   - name: 'gcr.io/cloud-builders/docker'
-    args: ['push', 'us-central1-docker.pkg.dev/cloud-442509/spring-boot-repo/spring-boot-app:$SHORT_SHA']
+    args: ['push', 'gcr.io/cloud-442509/spring-boot-app:latest']
 
-  # Step 3: Deploy to GKEEE
+  # Step 3: Deploy to Google Kubernetes Engine (GKE)
   - name: 'gcr.io/cloud-builders/kubectl'
     args:
-      - 'set'
-      - 'image'
-      - 'deployment/spring-boot-deployment'
-      - 'spring-boot-container=us-central1-docker.pkg.dev/cloud-442509/spring-boot-repo/spring-boot-app:$SHORT_SHA'
-    env:
-      - 'CLOUDSDK_COMPUTE_ZONE=us-central1'
-      - 'CLOUDSDK_CONTAINER_CLUSTER=spring-boot-cluster'
+      - 'apply'
+      - '-f'
+      - 'k8s/deployment.yaml'
+
+# Optional: List the images to be used in Kubernetes deployment
+images:
+  - 'gcr.io/$PROJECT_ID/spring-boot-app:latest'
 
 images:
   - 'us-central1-docker.pkg.dev/cloud-442509/spring-boot-repo/spring-boot-app:$SHORT_SHA'
