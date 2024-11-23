@@ -14,7 +14,7 @@ steps:
         'get-credentials',
         'spring-boot-cluster',
         '--zone',
-        'us-central1-a',
+        'us-central1',
         '--project',
         'cloud-442509',
       ]
