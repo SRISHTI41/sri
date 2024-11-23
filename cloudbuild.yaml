@@ -6,11 +6,18 @@ steps:
 
 
   # Step 3: Deploy to Google Kubernetes Engine (GKE))
-  - name: 'gcr.io/cloud-builders/kubectl'
+   - name: 'gcr.io/cloud-builders/gcloud'
     args:
-      - 'apply'
-      - '-f'
-      - 'k8s/deployment.yaml'
+      [
+        'container',
+        'clusters',
+        'get-credentials',
+        'spring-boot-cluster',
+        '--zone',
+        'us-central1-a',
+        '--project',
+        'cloud-442509',
+      ]
 
 # Optional: List the images to be used in Kubernetes deployment
 images:
