@@ -1,52 +1,22 @@
-# cloudbuild.yaml
 steps:
-  # Step 1: Use Maven to build the application
-  - name: 'gcr.io/cloud-builders/maven'
-    args: ['clean', 'package', '-DskipTests']
-
-  # Step 2: Build the Docker image
+  # Step 1: Build the Docker image
   - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'build'
-      - '--tag=gcr.io/cloud-442509/cloud-app:$SHORT_SHA'
-      - '.'
+    args: ['build', '-t', 'us-central1-docker.pkg.dev/cloud-442509/spring-boot-repo/spring-boot-app:$SHORT_SHA', '.']
 
-  # Step 3: Push the Docker image to Google Container Registry (GCR)
+  # Step 2: Push the Docker image to Artifact Registry
   - name: 'gcr.io/cloud-builders/docker'
-    args:
-      - 'push'
-      - 'gcr.io/cloud-442509/cloud-app:$SHORT_SHA'
+    args: ['push', 'us-central1-docker.pkg.dev/cloud-442509/spring-boot-repo/spring-boot-app:$SHORT_SHA']
 
-  
-
-  # Step 5: Set up Kubernetes configuration to deploy to GKE
-  - name: 'gcr.io/cloud-builders/gcloud'
-    args:
-      - 'container'
-      - 'clusters'
-      - 'get-credentials'
-      - 'cloud-cluster'
-      - '--zone'
-      - 'us-central1-a'
-      - '--project'
-      - 'cloud-442509'
-
-  # Step 6: Deploy the Docker image to GKE
+  # Step 3: Deploy to GKE
   - name: 'gcr.io/cloud-builders/kubectl'
     args:
       - 'set'
       - 'image'
-      - 'deployment/cloud-app'
-      - 'cloud-app=gcr.io/cloud-442509/cloud-app:$SHORT_SHA'
-      - '--record'
+      - 'deployment/spring-boot-deployment'
+      - 'spring-boot-container=us-central1-docker.pkg.dev/cloud-442509/spring-boot-repo/spring-boot-app:$SHORT_SHA'
+    env:
+      - 'CLOUDSDK_COMPUTE_ZONE=us-central1'
+      - 'CLOUDSDK_CONTAINER_CLUSTER=spring-boot-cluster'
 
-  # Step 7: Expose the application (optional)
-  - name: 'gcr.io/cloud-builders/kubectl'
-    args:
-      - 'apply'
-      - '-f'
-      - 'service.yaml'
-
-# Specify where to store build logs
-options:
-  logging: CLOUD_LOGGING_ONLY
+images:
+  - 'us-central1-docker.pkg.dev/cloud-442509/spring-boot-repo/spring-boot-app:$SHORT_SHA'
