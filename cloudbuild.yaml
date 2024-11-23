@@ -20,3 +20,5 @@ steps:
 
 images:
   - 'us-central1-docker.pkg.dev/cloud-442509/spring-boot-repo/spring-boot-app:$SHORT_SHA'
+options:
+  logging: CLOUD_LOGGING_ONLY
