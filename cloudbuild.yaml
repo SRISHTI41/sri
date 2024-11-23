@@ -7,7 +7,7 @@ steps:
   - name: 'gcr.io/cloud-builders/docker'
     args: ['push', 'gcr.io/cloud-442509/spring-boot-app:latest']
 
-  # Step 3: Deploy to Google Kubernetes Engine (GKE)
+  # Step 3: Deploy to Google Kubernetes Engine (GKE))
   - name: 'gcr.io/cloud-builders/kubectl'
     args:
       - 'apply'
