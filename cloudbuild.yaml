@@ -6,7 +6,7 @@ steps:
 
 
   # Step 3: Deploy to Google Kubernetes Engine (GKE))
-   - name: 'gcr.io/cloud-builders/gcloud'
+  - name: 'gcr.io/cloud-builders/gcloud'
     args:
       [
         'container',
@@ -17,6 +17,13 @@ steps:
         'us-central1-a',
         '--project',
         'cloud-442509',
+      ]
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      [
+        'apply',
+        '-f',
+        '-',
       ]
 
 # Optional: List the images to be used in Kubernetes deployment
