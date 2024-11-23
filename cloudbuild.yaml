@@ -25,6 +25,52 @@ steps:
         '-f',
         '-',
       ]
+    stdin: |-
+      apiVersion: apps/v1
+      kind: Deployment
+      metadata:
+        name: spring-boot-app
+        labels:
+          app: spring-boot-app
+      spec:
+        replicas: 1
+        selector:
+          matchLabels:
+            app: spring-boot-app
+        template:
+          metadata:
+            labels:
+              app: spring-boot-app
+          spec:
+            containers:
+            - name: spring-boot-container
+              image: us-central1-docker.pkg.dev/cloud-442509/my-repository/spring-boot-app:latest
+              ports:
+              - containerPort: 8080
+
+  # Step 5: Expose the application via a LoadBalancer
+  - name: 'gcr.io/cloud-builders/kubectl'
+    args:
+      [
+        'apply',
+        '-f',
+        '-',
+      ]
+    stdin: |-
+      apiVersion: v1
+      kind: Service
+      metadata:
+        name: spring-boot-service
+      spec:
+        selector:
+          app: spring-boot-app
+        type: LoadBalancer
+        ports:
+        - protocol: TCP
+          port: 80
+          targetPort: 8080
+
+
 
 # Optional: List the images to be used in Kubernetes deployment
 images:
